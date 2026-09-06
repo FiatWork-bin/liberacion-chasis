@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>ChassisTrack Pro - Móvil</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- SheetJS para Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- jsPDF y AutoTable para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --primary-blue: #2563eb;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --green-500: #22c55e;
+            --green-600: #16a34a;
+            --green-700: #15803d;
+            --yellow-500: #eab308;
+            --yellow-600: #ca8a04;
+            --orange-500: #f97316;
+            --red-500: #ef4444;
+            --red-600: #dc2626;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            color: #1e293b;
+            padding-bottom: 80px;
+            touch-action: manipulation;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #e2e8f0;
+            z-index: 100;
+            padding: 8px 0 12px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 10px;
+            color: #94a3b8;
+            padding: 4px 12px;
+            border-radius: 12px;
+            transition: all 0.2s;
+            min-height: 48px;
+            justify-content: center;
+            text-decoration: none;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        
+        .bottom-nav .nav-item i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        
+        .bottom-nav .nav-item.active {
+            color: #2563eb;
+            background: #eff6ff;
+            font-weight: 600;
+        }
+        
+        .bottom-nav .nav-item:active {
+            transform: scale(0.92);
+        }
+        
+        .industrial-card {
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-industrial {
+            min-height: 52px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            border-radius: 1rem;
+            transition: all 0.15s ease;
+            touch-action: manipulation;
+        }
+        
+        .btn-industrial:active {
+            transform: scale(0.96);
+        }
+        
+        input, select, textarea {
+            font-size: 16px !important;
+            border-radius: 0.75rem;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            transition: border 0.2s;
+            width: 100%;
+            touch-action: manipulation;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #2563eb;
+            outline: none;
+            background: white;
+        }
+        
+        .vehicle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .vehicle-btn {
+            border: 3px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 12px 6px;
+            text-align: center;
+            background: white;
+            transition: all 0.2s;
+            touch-action: manipulation;
+            min-height: 100px;
+        }
+        
+        .vehicle-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .vehicle-btn.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        
+        .vehicle-btn .icon {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .vehicle-btn .label {
+            font-size: 14px;
+            font-weight: 700;
+        }
+        
+        .vehicle-btn .sub {
+            font-size: 10px;
+            color: #64748b;
+        }
+        
+        .condicion-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .condicion-btn {
+            border: 3px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 16px 8px;
+            text-align: center;
+            background: white;
+            transition: all 0.2s;
+            touch-action: manipulation;
+            min-height: 80px;
+        }
+        
+        .condicion-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .condicion-btn .icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .condicion-btn .label {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .condicion-btn.verde.selected {
+            border-color: #22c55e;
+            background: #f0fdf4;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+        }
+        
+        .condicion-btn.amarillo.selected {
+            border-color: #eab308;
+            background: #fefce8;
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.2);
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        
+        .metric-value {
+            font-size: 2.25rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        .avatar-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 18px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .status-indicator.online { background: #22c55e; }
+        .status-indicator.offline { background: #f97316; }
+        
+        .identidad-modal .modal-card {
+            background: white;
+            max-width: 420px;
+            width: 100%;
+            border-radius: 2rem;
+            padding: 2rem 1.5rem;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            margin: 1rem;
+        }
+        
+        .identidad-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
+        
+        .identidad-modal.hidden-modal {
+            display: none !important;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .badge-verde { background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 9999px; font-weight: 600; font-size: 12px; }
+        .badge-amarillo { background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 9999px; font-weight: 600; font-size: 12px; }
+        .badge-titano { background: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 9999px; font-weight: 600; font-size: 12px; }
+        .badge-ram { background: #fce7f3; color: #9d174d; padding: 4px 12px; border-radius: 9999px; font-weight: 600; font-size: 12px; }
+        .badge-cronos { background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 9999px; font-weight: 600; font-size: 12px; }
+        .badge-activo { background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 9999px; font-weight: 600; font-size: 12px; }
+        .badge-inactivo { background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 9999px; font-weight: 600; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg sticky top-0 z-50">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2 rounded-lg">
+                    <i class="fas fa-industry text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold leading-tight">ChassisTrack</h1>
+                    <p class="text-[10px] text-slate-300">Industrial · Córdoba</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2 bg-slate-700 px-3 py-1.5 rounded-lg">
+                    <span id="statusDot" class="status-indicator online"></span>
+                    <span id="statusText" class="text-xs font-semibold">Online</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-slate-700 px-3 py-1.5 rounded-lg">
+                    <i class="far fa-clock text-blue-400 text-xs"></i>
+                    <span id="currentTime" class="text-xs font-semibold"></span>
+                </div>
+            </div>
+        </div>
+        <div class="px-4 pb-2 flex items-center justify-between bg-slate-800/50">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-user-circle text-blue-400 text-sm"></i>
+                <span id="nombreOperarioActual" class="text-xs font-medium text-green-300">Sin identificar</span>
+            </div>
+            <button onclick="cambiarOperario()" class="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded-full transition">
+                <i class="fas fa-exchange-alt mr-1"></i> Cambiar
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="px-4 py-4 max-w-3xl mx-auto" style="padding-bottom: 80px;">
+        
+        <!-- Tab: Registro -->
+        <div id="content-registro" class="tab-content animate-fade-in">
+            <div class="space-y-4">
+                <!-- Métricas -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="metric-card text-center">
+                        <p class="text-xs text-slate-500">Total</p>
+                        <p class="metric-value text-blue-600" id="totalDia">0</p>
+                    </div>
+                    <div class="metric-card text-center">
+                        <p class="text-xs text-slate-500">Verdes</p>
+                        <p class="metric-value text-green-600" id="verdesDia">0</p>
+                    </div>
+                    <div class="metric-card text-center">
+                        <p class="text-xs text-slate-500">Amarillos</p>
+                        <p class="metric-value text-yellow-600" id="amarillosDia">0</p>
+                    </div>
+                </div>
+
+                <!-- Formulario -->
+                <div class="industrial-card">
+                    <h2 class="text-lg font-bold mb-3 flex items-center space-x-2">
+                        <i class="fas fa-clipboard-check text-blue-600"></i>
+                        <span>Nueva Liberación</span>
+                    </h2>
+
+                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-3 mb-4 text-center">
+                        <p class="text-xs opacity-90">Fecha y Hora</p>
+                        <p id="fechaHoraRegistro" class="text-base font-bold"></p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-1">Operario *</label>
+                        <select id="operarioSelect" class="w-full" required>
+                            <option value="">Seleccionar</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-2">Tipo de Vehículo *</label>
+                        <div class="vehicle-grid">
+                            <button onclick="selectTipoVehiculo('titano')" id="btnTitano" class="vehicle-btn">
+                                <span class="icon">🚛</span>
+                                <span class="label text-blue-700">TITANO</span>
+                                <span class="sub">Pickup Full</span>
+                            </button>
+                            <button onclick="selectTipoVehiculo('ram')" id="btnRam" class="vehicle-btn">
+                                <span class="icon">🚚</span>
+                                <span class="label text-pink-700">RAM</span>
+                                <span class="sub">Mediana</span>
+                            </button>
+                            <button onclick="selectTipoVehiculo('cronos')" id="btnCronos" class="vehicle-btn">
+                                <span class="icon">🚗</span>
+                                <span class="label text-indigo-700">CRONOS</span>
+                                <span class="sub">Sedán</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-1">Número de Chasis *</label>
+                        <div class="relative">
+                            <input type="text" id="chasisInput" class="w-full pr-16" placeholder="Ej: 1234567" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+                            <button onclick="escanearChasis()" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                                <i class="fas fa-barcode"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">Solo números · Teclado numérico automático</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-2">Condición *</label>
+                        <div class="condicion-grid">
+                            <button onclick="selectCondicion('verde')" id="btnVerde" class="condicion-btn verde">
+                                <span class="icon">✅</span>
+                                <span class="label text-green-700">VERDE</span>
+                                <span class="text-xs text-slate-500">Aprobado</span>
+                            </button>
+                            <button onclick="selectCondicion('amarillo')" id="btnAmarillo" class="condicion-btn amarillo">
+                                <span class="icon">⚠️</span>
+                                <span class="label text-yellow-700">AMARILLO</span>
+                                <span class="text-xs text-slate-500">Observación</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold mb-1">Observaciones</label>
+                        <textarea id="observacionesInput" rows="2" placeholder="Notas adicionales..."></textarea>
+                    </div>
+
+                    <button onclick="registrarLiberacion()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl btn-industrial shadow-lg">
+                        <i class="fas fa-save mr-2"></i> REGISTRAR
+                    </button>
+                </div>
+
+                <!-- Últimos registros -->
+                <div class="industrial-card">
+                    <h3 class="text-md font-bold mb-3 flex items-center space-x-2">
+                        <i class="fas fa-clock text-slate-500"></i>
+                        <span>Últimos registros</span>
+                    </h3>
+                    <div id="ultimosRegistros" class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
+                        <p class="text-sm text-slate-400 text-center py-4">Sin registros recientes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Historial (sin botones de exportación) -->
+        <div id="content-historial" class="tab-content hidden animate-fade-in">
+            <div class="industrial-card">
+                <h2 class="text-lg font-bold flex items-center space-x-2 mb-4">
+                    <i class="fas fa-history text-blue-600"></i>
+                    <span>Historial</span>
+                </h2>
+
+                <!-- Filtros -->
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <div>
+                        <label class="text-xs font-semibold">Chasis</label>
+                        <input type="text" id="filtroChasis" oninput="filtrarHistorial()" placeholder="Buscar...">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold">Tipo</label>
+                        <select id="filtroTipoVehiculo" onchange="filtrarHistorial()">
+                            <option value="">Todos</option>
+                            <option value="titano">Titano</option>
+                            <option value="ram">RAM</option>
+                            <option value="cronos">Cronos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold">Operario</label>
+                        <select id="filtroOperario" onchange="filtrarHistorial()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold">Desde</label>
+                        <input type="date" id="filtroFechaDesde" onchange="filtrarHistorial()">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold">Hasta</label>
+                        <input type="date" id="filtroFechaHasta" onchange="filtrarHistorial()">
+                    </div>
+                </div>
+
+                <!-- Tabla -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-slate-800 text-white">
+                            <tr>
+                                <th class="px-2 py-2 text-left text-[10px] font-semibold">Fecha</th>
+                                <th class="px-2 py-2 text-left text-[10px] font-semibold">Hora</th>
+                                <th class="px-2 py-2 text-left text-[10px] font-semibold">Tipo</th>
+                                <th class="px-2 py-2 text-left text-[10px] font-semibold">Chasis</th>
+                                <th class="px-2 py-2 text-left text-[10px] font-semibold">Operario</th>
+                                <th class="px-2 py-2 text-left text-[10px] font-semibold">Cond.</th>
+                                <th class="px-2 py-2 text-left text-[10px] font-semibold">Acc.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaHistorial" class="divide-y divide-slate-200">
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-xs text-slate-400 mt-3 text-center">Las exportaciones están disponibles en la pestaña "Reportes"</p>
+            </div>
+        </div>
+
+        <!-- Tab: Reportes (exportaciones) -->
+        <div id="content-reportes" class="tab-content hidden animate-fade-in">
+            <div class="industrial-card">
+                <h3 class="text-lg font-bold mb-4 flex items-center space-x-2">
+                    <i class="fas fa-file-export text-blue-600"></i>
+                    <span>Exportar Reportes</span>
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-semibold">Desde</label>
+                        <input type="date" id="excelDesde">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold">Hasta</label>
+                        <input type="date" id="excelHasta">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                    <button onclick="exportarExcel('personalizado')" class="bg-green-600 text-white py-3 rounded-xl font-bold btn-industrial">
+                        <i class="fas fa-file-excel mr-2"></i> Excel
+                    </button>
+                    <button onclick="exportarPDF('personalizado')" class="bg-red-600 text-white py-3 rounded-xl font-bold btn-industrial">
+                        <i class="fas fa-file-pdf mr-2"></i> PDF
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 mt-3 text-center">Selecciona un rango de fechas o exporta todo</p>
+            </div>
+        </div>
+
+        <!-- Tab: Operarios -->
+        <div id="content-operarios" class="tab-content hidden animate-fade-in">
+            <div class="industrial-card">
+                <h3 class="text-lg font-bold mb-4 flex items-center space-x-2">
+                    <i class="fas fa-users-cog text-blue-600"></i>
+                    <span>Gestión de Operarios</span>
+                </h3>
+
+                <form id="formOperario" onsubmit="guardarOperario(event)" class="space-y-3">
+                    <input type="hidden" id="operarioId">
+                    <div>
+                        <label class="text-xs font-semibold">Nombre</label>
+                        <input type="text" id="operarioNombre" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold">Código</label>
+                        <input type="text" id="operarioCodigo" placeholder="Ej: QC-001" required>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold btn-industrial">
+                            <i class="fas fa-save mr-2"></i> Guardar
+                        </button>
+                        <button type="button" onclick="cancelarEdicion()" class="px-4 bg-slate-200 text-slate-700 py-3 rounded-xl font-bold">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="my-4">
+                <div id="listaOperarios" class="space-y-3 max-h-80 overflow-y-auto scrollbar-thin">
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+    <nav class="bottom-nav" id="bottomNav">
+        <button onclick="switchTab('registro')" id="nav-registro" class="nav-item active">
+            <i class="fas fa-plus-circle"></i>
+            <span>Registro</span>
+        </button>
+        <button onclick="switchTab('historial')" id="nav-historial" class="nav-item">
+            <i class="fas fa-history"></i>
+            <span>Historial</span>
+        </button>
+        <button onclick="switchTab('reportes')" id="nav-reportes" class="nav-item">
+            <i class="fas fa-file-export"></i>
+            <span>Reportes</span>
+        </button>
+        <button onclick="switchTab('operarios')" id="nav-operarios" class="nav-item">
+            <i class="fas fa-users-cog"></i>
+            <span>Operarios</span>
+        </button>
+    </nav>
+
+    <!-- Modales -->
+    <div id="modalNotificacion" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fade-in">
+            <div class="text-center">
+                <i id="notifIcon" class="fas fa-check-circle text-6xl text-green-500 mb-3"></i>
+                <h3 id="notifTitulo" class="text-xl font-bold mb-1">¡Éxito!</h3>
+                <p id="notifMensaje" class="text-sm text-slate-600 mb-5">Operación completada</p>
+                <button onclick="cerrarNotificacion()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold w-full btn-industrial">
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalConfirmacion" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fade-in">
+            <div class="text-center">
+                <i class="fas fa-exclamation-triangle text-6xl text-yellow-500 mb-3"></i>
+                <h3 id="confirmTitulo" class="text-xl font-bold mb-1">¿Confirmar?</h3>
+                <p id="confirmMensaje" class="text-sm text-slate-600 mb-5">Esta acción no se puede deshacer</p>
+                <div class="flex gap-3">
+                    <button onclick="ejecutarAccionConfirmada()" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold btn-industrial">
+                        Confirmar
+                    </button>
+                    <button onclick="cerrarConfirmacion()" class="flex-1 bg-slate-200 text-slate-700 py-3 rounded-xl font-bold">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalIdentidad" class="identidad-modal">
+        <div class="modal-card">
+            <div class="text-center mb-5">
+                <div class="bg-blue-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-user-plus text-4xl text-white"></i>
+                </div>
+                <h2 class="text-2xl font-bold">Identifícate</h2>
+                <p class="text-sm text-slate-500">Único por dispositivo</p>
+            </div>
+            <form id="formIdentidad" class="space-y-4">
+                <div>
+                    <label class="text-sm font-semibold">Selecciona usuario</label>
+                    <select id="identidadOperarioSelect" class="w-full">
+                        <option value="">Seleccionar</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold">O ingresa código</label>
+                    <input type="text" id="identidadCodigo" placeholder="Ej: QC-001">
+                </div>
+                <div id="identidadNombreContainer" class="hidden">
+                    <label class="text-sm font-semibold">Nombre completo</label>
+                    <input type="text" id="identidadNombre" placeholder="Ej: Juan Pérez">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold btn-industrial">
+                    <i class="fas fa-id-badge mr-2"></i> Identificarse
+                </button>
+                <p class="text-[10px] text-slate-400 text-center">Este dispositivo quedará asociado a tu usuario</p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ============ CONFIGURACIÓN JSONBin ============
+        const JSONBIN_API_KEY = '$2a$10$uw1yzcp42gBdzl8PtC3B1uBVXxSqOHPwrO1OZXUNHLDfIGrgZktoy';
+        const JSONBIN_BIN_ID = '6a975504da38895dfe2cfd99';
+
+        // ============ VARIABLES GLOBALES ============
+        let registros = [];
+        let operarios = [];
+        let condicionSeleccionada = null;
+        let tipoVehiculoSeleccionado = null;
+        let accionPendiente = null;
+        let sincronizando = false;
+        let operarioActual = null;
+        const STORAGE_OPERARIO_ID = 'dispositivo_operario_id';
+
+        const tiposVehiculo = {
+            titano: { nombre: 'Fiat Titano', badge: 'badge-titano' },
+            ram: { nombre: 'RAM Dakota', badge: 'badge-ram' },
+            cronos: { nombre: 'Fiat Cronos', badge: 'badge-cronos' }
+        };
+
+        // ============ INICIALIZACIÓN ============
+        document.addEventListener('DOMContentLoaded', async function() {
+            await cargarDatosDesdeServidor();
+            
+            const operarioDispositivo = getOperarioDispositivo();
+            if (operarioDispositivo) {
+                operarioActual = operarioDispositivo;
+                actualizarDisplayOperario();
+                ocultarModalIdentidad();
+            } else {
+                mostrarModalIdentidad();
+            }
+            
+            actualizarReloj();
+            setInterval(actualizarReloj, 1000);
+            verificarConexion();
+            window.addEventListener('online', verificarConexion);
+            window.addEventListener('offline', verificarConexion);
+            
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('filtroFechaHasta').value = hoy;
+            document.getElementById('excelHasta').value = hoy;
+            
+            actualizarUI();
+        });
+
+        // ============ SINCRONIZACIÓN ============
+        async function cargarDatosDesdeServidor() {
+            try {
+                mostrarSincronizando(true);
+                const resp = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_API_KEY }
+                });
+                if (resp.ok) {
+                    const datos = await resp.json();
+                    if (datos.record && datos.record.registros && datos.record.operarios) {
+                        registros = datos.record.registros;
+                        operarios = datos.record.operarios;
+                    }
+                }
+            } catch(e) {
+                cargarDesdeLocalStorage();
+            } finally {
+                mostrarSincronizando(false);
+                actualizarUI();
+            }
+        }
+
+        async function guardarDatosEnServidor() {
+            if (sincronizando) return;
+            try {
+                sincronizando = true;
+                mostrarSincronizando(true);
+                const datos = { registros, operarios };
+                await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
+                    body: JSON.stringify(datos)
+                });
+                guardarEnLocalStorage();
+            } catch(e) {
+                guardarEnLocalStorage();
+            } finally {
+                sincronizando = false;
+                mostrarSincronizando(false);
+            }
+        }
+
+        function cargarDesdeLocalStorage() {
+            registros = JSON.parse(localStorage.getItem('chassisRegistros')) || [];
+            operarios = JSON.parse(localStorage.getItem('operarios')) || [];
+            if (operarios.length === 0) {
+                operarios = [
+                    { id: 1, nombre: 'Juan Pérez', codigo: 'QC-001', estado: 'activo' },
+                    { id: 2, nombre: 'María García', codigo: 'QC-002', estado: 'activo' },
+                    { id: 3, nombre: 'Carlos López', codigo: 'QC-003', estado: 'activo' }
+                ];
+            }
+        }
+
+        function guardarEnLocalStorage() {
+            localStorage.setItem('chassisRegistros', JSON.stringify(registros));
+            localStorage.setItem('operarios', JSON.stringify(operarios));
+        }
+
+        function mostrarSincronizando(estado) {
+            // No hay elemento syncIndicator en el HTML, se omite
+        }
+
+        // ============ IDENTIDAD ============
+        function getOperarioDispositivo() {
+            const id = localStorage.getItem(STORAGE_OPERARIO_ID);
+            if (id) {
+                const op = operarios.find(o => o.id == id && o.estado === 'activo');
+                if (op) return op;
+            }
+            return null;
+        }
+
+        function setOperarioDispositivo(operarioId) {
+            localStorage.setItem(STORAGE_OPERARIO_ID, operarioId);
+            operarioActual = operarios.find(o => o.id == operarioId) || null;
+            actualizarDisplayOperario();
+        }
+
+        function actualizarDisplayOperario() {
+            const nombreSpan = document.getElementById('nombreOperarioActual');
+            if (operarioActual) {
+                nombreSpan.textContent = `${operarioActual.nombre} (${operarioActual.codigo})`;
+                nombreSpan.className = 'text-xs font-medium text-green-300';
+                const select = document.getElementById('operarioSelect');
+                if (select) {
+                    for (let option of select.options) {
+                        if (option.value === operarioActual.nombre) {
+                            select.value = option.value;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                nombreSpan.textContent = 'Sin identificar';
+                nombreSpan.className = 'text-xs font-medium text-orange-300';
+            }
+        }
+
+        function mostrarModalIdentidad() {
+            const modal = document.getElementById('modalIdentidad');
+            modal.classList.remove('hidden-modal');
+            const select = document.getElementById('identidadOperarioSelect');
+            const activos = operarios.filter(o => o.estado === 'activo');
+            select.innerHTML = '<option value="">Seleccionar</option>' +
+                activos.map(o => `<option value="${o.id}">${o.nombre} (${o.codigo})</option>`).join('');
+            document.getElementById('identidadCodigo').value = '';
+            document.getElementById('identidadNombre').value = '';
+            document.getElementById('identidadNombreContainer').classList.add('hidden');
+        }
+
+        function ocultarModalIdentidad() {
+            document.getElementById('modalIdentidad').classList.add('hidden-modal');
+        }
+
+        function cambiarOperario() {
+            localStorage.removeItem(STORAGE_OPERARIO_ID);
+            operarioActual = null;
+            actualizarDisplayOperario();
+            mostrarModalIdentidad();
+        }
+
+        // Eventos identidad
+        document.getElementById('identidadCodigo')?.addEventListener('input', function() {
+            const codigo = this.value.trim().toUpperCase();
+            const operario = operarios.find(o => o.codigo.toUpperCase() === codigo);
+            const container = document.getElementById('identidadNombreContainer');
+            if (operario) {
+                document.getElementById('identidadNombre').value = operario.nombre;
+                container.classList.remove('hidden');
+                const select = document.getElementById('identidadOperarioSelect');
+                for (let option of select.options) {
+                    if (option.value == operario.id) { select.value = option.value; break; }
+                }
+            } else if (codigo.length > 0) {
+                container.classList.remove('hidden');
+                document.getElementById('identidadNombre').value = '';
+                document.getElementById('identidadOperarioSelect').value = '';
+            } else {
+                container.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('identidadOperarioSelect')?.addEventListener('change', function() {
+            const id = this.value;
+            if (id) {
+                const op = operarios.find(o => o.id == id);
+                if (op) {
+                    document.getElementById('identidadCodigo').value = op.codigo;
+                    document.getElementById('identidadNombre').value = op.nombre;
+                    document.getElementById('identidadNombreContainer').classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('identidadCodigo').value = '';
+                document.getElementById('identidadNombre').value = '';
+                document.getElementById('identidadNombreContainer').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('formIdentidad')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const codigo = document.getElementById('identidadCodigo').value.trim().toUpperCase();
+            const nombre = document.getElementById('identidadNombre').value.trim();
+            const selectId = document.getElementById('identidadOperarioSelect').value;
+            if (!codigo) { mostrarNotificacion('error', 'Campo Requerido', 'Ingresa un código'); return; }
+            let operario = operarios.find(o => o.codigo.toUpperCase() === codigo);
+            if (!operario && !nombre) {
+                mostrarNotificacion('error', 'Datos Incompletos', 'Debes ingresar el nombre');
+                return;
+            }
+            if (!operario) {
+                operario = { id: Date.now(), nombre: nombre, codigo: codigo, estado: 'activo' };
+                operarios.push(operario);
+                guardarDatosEnServidor();
+                mostrarNotificacion('success', 'Bienvenido', `Usuario ${nombre} creado`);
+            } else {
+                if (operario.estado !== 'activo') {
+                    mostrarNotificacion('error', 'Usuario Inactivo', 'Este operario está desactivado');
+                    return;
+                }
+                mostrarNotificacion('success', 'Identificado', `Bienvenido ${operario.nombre}`);
+            }
+            setOperarioDispositivo(operario.id);
+            ocultarModalIdentidad();
+            actualizarUI();
+        });
+
+        // ============ UI ============
+        function actualizarUI() {
+            cargarOperariosEnSelects();
+            actualizarListaOperarios();
+            actualizarMetricas();
+            actualizarUltimosRegistros();
+            actualizarHistorial();
+            actualizarFechaHora();
+            actualizarDisplayOperario();
+        }
+
+        function actualizarFechaHora() {
+            const ahora = new Date();
+            const opciones = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
+            document.getElementById('fechaHoraRegistro').textContent = ahora.toLocaleDateString('es-ES', opciones);
+        }
+
+        function verificarConexion() {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            if (navigator.onLine) {
+                dot.className = 'status-indicator online';
+                text.textContent = 'Online';
+            } else {
+                dot.className = 'status-indicator offline';
+                text.textContent = 'Offline';
+            }
+        }
+
+        function actualizarReloj() {
+            const ahora = new Date();
+            document.getElementById('currentTime').textContent = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ============ NAVEGACIÓN ============
+        function switchTab(tabName) {
+            const tabs = ['registro', 'historial', 'reportes', 'operarios'];
+            tabs.forEach(t => {
+                document.getElementById(`content-${t}`).classList.add('hidden');
+                document.getElementById(`nav-${t}`).classList.remove('active');
+            });
+            document.getElementById(`content-${tabName}`).classList.remove('hidden');
+            document.getElementById(`nav-${tabName}`).classList.add('active');
+            if (tabName === 'historial') actualizarHistorial();
+            if (tabName === 'operarios') { cargarOperariosEnSelects(); actualizarListaOperarios(); }
+        }
+
+        // ============ OPERARIOS ============
+        function cargarOperariosEnSelects() {
+            const activos = operarios.filter(o => o.estado === 'activo');
+            const selectOp = document.getElementById('operarioSelect');
+            selectOp.innerHTML = '<option value="">Seleccionar</option>' +
+                activos.map(o => `<option value="${o.nombre}">${o.nombre} (${o.codigo})</option>`).join('');
+            const filtroOp = document.getElementById('filtroOperario');
+            filtroOp.innerHTML = '<option value="">Todos</option>' +
+                operarios.map(o => `<option value="${o.nombre}">${o.nombre}</option>`).join('');
+        }
+
+        function actualizarListaOperarios() {
+            const cont = document.getElementById('listaOperarios');
+            if (operarios.length === 0) {
+                cont.innerHTML = '<p class="text-center py-4 text-slate-400 text-sm">Sin operarios</p>';
+                return;
+            }
+            cont.innerHTML = operarios.map(o => {
+                const badge = o.estado === 'activo' ? 'badge-activo' : 'badge-inactivo';
+                const inicial = o.nombre.charAt(0).toUpperCase();
+                return `
+                <div class="bg-slate-50 rounded-xl p-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="avatar-circle bg-blue-600">${inicial}</div>
+                        <div>
+                            <p class="font-bold text-sm">${o.nombre}</p>
+                            <p class="text-xs text-slate-500">${o.codigo}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="${badge}">${o.estado}</span>
+                        <button onclick="editarOperario(${o.id})" class="text-blue-600 p-1"><i class="fas fa-edit"></i></button>
+                        <button onclick="confirmarEliminarOperario(${o.id})" class="text-red-600 p-1"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function guardarOperario(e) {
+            e.preventDefault();
+            const id = document.getElementById('operarioId').value;
+            const nombre = document.getElementById('operarioNombre').value.trim();
+            const codigo = document.getElementById('operarioCodigo').value.trim();
+            if (!nombre || !codigo) { mostrarNotificacion('error', 'Campos Requeridos', ''); return; }
+            const existente = operarios.find(o => o.codigo === codigo && o.id != id);
+            if (existente) { mostrarNotificacion('error', 'Código Duplicado', ''); return; }
+            if (id) {
+                const idx = operarios.findIndex(o => o.id == id);
+                if (idx !== -1) operarios[idx] = { ...operarios[idx], nombre, codigo };
+            } else {
+                operarios.push({ id: Date.now(), nombre, codigo, estado: 'activo' });
+            }
+            guardarDatosEnServidor();
+            cancelarEdicion();
+            actualizarUI();
+            mostrarNotificacion('success', 'Operario Guardado', '');
+        }
+
+        function editarOperario(id) {
+            const op = operarios.find(o => o.id === id);
+            if (!op) return;
+            document.getElementById('operarioId').value = op.id;
+            document.getElementById('operarioNombre').value = op.nombre;
+            document.getElementById('operarioCodigo').value = op.codigo;
+        }
+
+        function cancelarEdicion() {
+            document.getElementById('operarioId').value = '';
+            document.getElementById('operarioNombre').value = '';
+            document.getElementById('operarioCodigo').value = '';
+        }
+
+        function confirmarEliminarOperario(id) {
+            const op = operarios.find(o => o.id === id);
+            if (!op) return;
+            accionPendiente = { tipo: 'eliminarOperario', id: id };
+            document.getElementById('confirmTitulo').textContent = 'Eliminar Operario';
+            document.getElementById('confirmMensaje').textContent = `Eliminar a ${op.nombre}?`;
+            document.getElementById('modalConfirmacion').classList.remove('hidden');
+            document.getElementById('modalConfirmacion').classList.add('flex');
+        }
+
+        function eliminarOperario(id) {
+            operarios = operarios.filter(o => o.id !== id);
+            guardarDatosEnServidor();
+            actualizarUI();
+            mostrarNotificacion('success', 'Operario Eliminado', '');
+        }
+
+        // ============ REGISTRO ============
+        function selectTipoVehiculo(tipo) {
+            tipoVehiculoSeleccionado = tipo;
+            document.querySelectorAll('.vehicle-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('btnTitano').classList.remove('selected');
+            document.getElementById('btnRam').classList.remove('selected');
+            document.getElementById('btnCronos').classList.remove('selected');
+            if (tipo === 'titano') document.getElementById('btnTitano').classList.add('selected');
+            else if (tipo === 'ram') document.getElementById('btnRam').classList.add('selected');
+            else if (tipo === 'cronos') document.getElementById('btnCronos').classList.add('selected');
+        }
+
+        function selectCondicion(condicion) {
+            condicionSeleccionada = condicion;
+            document.querySelectorAll('.condicion-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('btnVerde').classList.remove('selected');
+            document.getElementById('btnAmarillo').classList.remove('selected');
+            if (condicion === 'verde') document.getElementById('btnVerde').classList.add('selected');
+            else document.getElementById('btnAmarillo').classList.add('selected');
+        }
+
+        function registrarLiberacion() {
+            if (!operarioActual) {
+                mostrarNotificacion('error', 'No Identificado', 'Debes identificarte');
+                mostrarModalIdentidad();
+                return;
+            }
+            const operario = document.getElementById('operarioSelect').value;
+            const chasis = document.getElementById('chasisInput').value.trim();
+            const obs = document.getElementById('observacionesInput').value.trim();
+            if (!operario || !tipoVehiculoSeleccionado || !chasis || !condicionSeleccionada) {
+                mostrarNotificacion('error', 'Campos Requeridos', 'Completa todos los campos');
+                return;
+            }
+            if (registros.find(r => r.chasis === chasis)) {
+                mostrarNotificacion('error', 'Chasis Duplicado', `El chasis ${chasis} ya existe`);
+                return;
+            }
+            const ahora = new Date();
+            const registro = {
+                id: Date.now() + Math.random(),
+                fecha: ahora.toISOString().split('T')[0],
+                hora: ahora.toLocaleTimeString('es-ES', { hour12: false }),
+                timestamp: ahora.toISOString(),
+                tipoVehiculo: tipoVehiculoSeleccionado,
+                chasis: chasis,
+                operario: operario,
+                condicion: condicionSeleccionada,
+                observaciones: obs
+            };
+            registros.unshift(registro);
+            guardarDatosEnServidor();
+            document.getElementById('chasisInput').value = '';
+            document.getElementById('observacionesInput').value = '';
+            condicionSeleccionada = null;
+            tipoVehiculoSeleccionado = null;
+            document.querySelectorAll('.vehicle-btn, .condicion-btn').forEach(b => b.classList.remove('selected'));
+            actualizarUI();
+            mostrarNotificacion('success', '¡Registrado!', `Chasis ${chasis} liberado`);
+            document.getElementById('chasisInput').focus();
+        }
+
+        function escanearChasis() {
+            const fake = 'CH-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 1000) + 1).padStart(3, '0');
+            document.getElementById('chasisInput').value = fake;
+            document.getElementById('chasisInput').focus();
+        }
+
+        // ============ MÉTRICAS E HISTORIAL ============
+        function actualizarMetricas() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const regHoy = registros.filter(r => r.fecha === hoy);
+            document.getElementById('totalDia').textContent = regHoy.length;
+            document.getElementById('verdesDia').textContent = regHoy.filter(r => r.condicion === 'verde').length;
+            document.getElementById('amarillosDia').textContent = regHoy.filter(r => r.condicion === 'amarillo').length;
+        }
+
+        function actualizarUltimosRegistros() {
+            const cont = document.getElementById('ultimosRegistros');
+            const ultimos = registros.slice(0, 8);
+            if (ultimos.length === 0) {
+                cont.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">Sin registros</p>';
+                return;
+            }
+            cont.innerHTML = ultimos.map(r => {
+                const badge = r.condicion === 'verde' ? 'badge-verde' : 'badge-amarillo';
+                const tipo = tiposVehiculo[r.tipoVehiculo]?.nombre || 'N/A';
+                return `
+                <div class="bg-slate-50 rounded-xl p-3 flex items-center justify-between">
+                    <div>
+                        <p class="font-bold text-sm">${r.chasis}</p>
+                        <p class="text-xs text-slate-500">${r.operario}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="${badge}">${r.condicion.toUpperCase()}</span>
+                        <p class="text-[10px] text-slate-400">${r.fecha} ${r.hora}</p>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function actualizarHistorial() {
+            const tbody = document.getElementById('tablaHistorial');
+            if (registros.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-400 text-sm">Sin registros</td></tr>';
+                return;
+            }
+            tbody.innerHTML = registros.map((r, i) => {
+                const badge = r.condicion === 'verde' ? 'badge-verde' : 'badge-amarillo';
+                const tipo = tiposVehiculo[r.tipoVehiculo]?.nombre || 'N/A';
+                const tipoBadge = tiposVehiculo[r.tipoVehiculo]?.badge || 'badge-titano';
+                return `
+                <tr>
+                    <td class="px-2 py-2 text-[10px]">${r.fecha}</td>
+                    <td class="px-2 py-2 text-[10px]">${r.hora}</td>
+                    <td class="px-2 py-2"><span class="${tipoBadge} text-[10px]">${tipo}</span></td>
+                    <td class="px-2 py-2 font-bold text-xs">${r.chasis}</td>
+                    <td class="px-2 py-2 text-[10px]">${r.operario}</td>
+                    <td class="px-2 py-2"><span class="${badge} text-[10px]">${r.condicion.toUpperCase()}</span></td>
+                    <td class="px-2 py-2">
+                        <button onclick="confirmarEliminarRegistro(${i})" class="text-red-500 p-1"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function filtrarHistorial() {
+            const chasis = document.getElementById('filtroChasis').value.toLowerCase();
+            const tipo = document.getElementById('filtroTipoVehiculo').value;
+            const op = document.getElementById('filtroOperario').value;
+            const desde = document.getElementById('filtroFechaDesde').value;
+            const hasta = document.getElementById('filtroFechaHasta').value;
+            let filtrados = [...registros];
+            if (chasis) filtrados = filtrados.filter(r => r.chasis.toLowerCase().includes(chasis));
+            if (tipo) filtrados = filtrados.filter(r => r.tipoVehiculo === tipo);
+            if (op) filtrados = filtrados.filter(r => r.operario === op);
+            if (desde) filtrados = filtrados.filter(r => r.fecha >= desde);
+            if (hasta) filtrados = filtrados.filter(r => r.fecha <= hasta);
+            const tbody = document.getElementById('tablaHistorial');
+            if (filtrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-400 text-sm">Sin coincidencias</td></tr>';
+                return;
+            }
+            tbody.innerHTML = filtrados.map((r, i) => {
+                const badge = r.condicion === 'verde' ? 'badge-verde' : 'badge-amarillo';
+                const tipoBadge = tiposVehiculo[r.tipoVehiculo]?.badge || 'badge-titano';
+                const tipoNombre = tiposVehiculo[r.tipoVehiculo]?.nombre || 'N/A';
+                const idx = registros.indexOf(r);
+                return `
+                <tr>
+                    <td class="px-2 py-2 text-[10px]">${r.fecha}</td>
+                    <td class="px-2 py-2 text-[10px]">${r.hora}</td>
+                    <td class="px-2 py-2"><span class="${tipoBadge} text-[10px]">${tipoNombre}</span></td>
+                    <td class="px-2 py-2 font-bold text-xs">${r.chasis}</td>
+                    <td class="px-2 py-2 text-[10px]">${r.operario}</td>
+                    <td class="px-2 py-2"><span class="${badge} text-[10px]">${r.condicion.toUpperCase()}</span></td>
+                    <td class="px-2 py-2">
+                        <button onclick="confirmarEliminarRegistro(${idx})" class="text-red-500 p-1"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function confirmarEliminarRegistro(index) {
+            accionPendiente = { tipo: 'eliminarRegistro', index: index };
+            document.getElementById('confirmTitulo').textContent = 'Eliminar Registro';
+            document.getElementById('confirmMensaje').textContent = '¿Eliminar este registro?';
+            document.getElementById('modalConfirmacion').classList.remove('hidden');
+            document.getElementById('modalConfirmacion').classList.add('flex');
+        }
+
+        // ============ EXPORTACIONES (PDF CORREGIDO) ============
+        function exportarExcel(tipo) {
+            let datos = registros;
+            if (tipo === 'personalizado') {
+                const desde = document.getElementById('excelDesde').value;
+                const hasta = document.getElementById('excelHasta').value;
+                datos = registros.filter(r => {
+                    if (desde && r.fecha < desde) return false;
+                    if (hasta && r.fecha > hasta) return false;
+                    return true;
+                });
+            }
+            if (datos.length === 0) {
+                mostrarNotificacion('error', 'Sin Datos', 'No hay registros para exportar');
+                return;
+            }
+            const excel = datos.map(r => ({
+                'Fecha': r.fecha,
+                'Hora': r.hora,
+                'Tipo': tiposVehiculo[r.tipoVehiculo]?.nombre || 'N/A',
+                'Chasis': r.chasis,
+                'Operario': r.operario,
+                'Condición': r.condicion.toUpperCase(),
+                'Observaciones': r.observaciones || ''
+            }));
+            const ws = XLSX.utils.json_to_sheet(excel);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Liberaciones');
+            XLSX.writeFile(wb, `chassis_${new Date().toISOString().split('T')[0]}.xlsx`);
+            mostrarNotificacion('success', 'Excel Generado', `${datos.length} registros`);
+        }
+
+        function exportarPDF(tipo) {
+            // Verificar que la librería jsPDF esté disponible
+            if (typeof window.jspdf === 'undefined') {
+                mostrarNotificacion('error', 'Error', 'La librería PDF no está cargada. Intenta recargar la página.');
+                return;
+            }
+
+            // Obtener fechas del mismo campo que Excel (ahora unificado)
+            const desde = document.getElementById('excelDesde').value;
+            const hasta = document.getElementById('excelHasta').value;
+            
+            let datos = registros;
+            if (tipo === 'personalizado') {
+                datos = registros.filter(r => {
+                    if (desde && r.fecha < desde) return false;
+                    if (hasta && r.fecha > hasta) return false;
+                    return true;
+                });
+            }
+            if (datos.length === 0) {
+                mostrarNotificacion('error', 'Sin Datos', 'No hay registros para exportar');
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Encabezado
+                doc.setFillColor(30, 41, 59);
+                doc.rect(0, 0, 210, 40, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(18);
+                doc.text('CHASSISTRACK PRO', 105, 18, { align: 'center' });
+                doc.setFontSize(10);
+                doc.text('Reporte de Liberaciones', 105, 28, { align: 'center' });
+
+                // Tabla
+                doc.autoTable({
+                    startY: 45,
+                    head: [['Fecha', 'Hora', 'Tipo', 'Chasis', 'Operario', 'Cond']],
+                    body: datos.map(r => [
+                        r.fecha,
+                        r.hora,
+                        tiposVehiculo[r.tipoVehiculo]?.nombre || 'N/A',
+                        r.chasis,
+                        r.operario,
+                        r.condicion.toUpperCase()
+                    ]),
+                    theme: 'grid',
+                    headStyles: { fillColor: [30, 41, 59], fontSize: 8 },
+                    bodyStyles: { fontSize: 7 },
+                    margin: { left: 10, right: 10 }
+                });
+
+                doc.save(`chassis_${new Date().toISOString().split('T')[0]}.pdf`);
+                mostrarNotificacion('success', 'PDF Generado', `${datos.length} registros`);
+            } catch (error) {
+                console.error('Error al generar PDF:', error);
+                mostrarNotificacion('error', 'Error PDF', 'No se pudo generar el PDF. Revisa la consola.');
+            }
+        }
+
+        // ============ NOTIFICACIONES ============
+        function mostrarNotificacion(tipo, titulo, mensaje) {
+            const modal = document.getElementById('modalNotificacion');
+            const icon = document.getElementById('notifIcon');
+            if (tipo === 'success') {
+                icon.className = 'fas fa-check-circle text-6xl text-green-500 mb-3';
+            } else {
+                icon.className = 'fas fa-exclamation-circle text-6xl text-red-500 mb-3';
+            }
+            document.getElementById('notifTitulo').textContent = titulo;
+            document.getElementById('notifMensaje').textContent = mensaje;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(cerrarNotificacion, 3000);
+        }
+
+        function cerrarNotificacion() {
+            document.getElementById('modalNotificacion').classList.add('hidden');
+            document.getElementById('modalNotificacion').classList.remove('flex');
+        }
+
+        function ejecutarAccionConfirmada() {
+            if (accionPendiente) {
+                if (accionPendiente.tipo === 'eliminarRegistro') {
+                    registros.splice(accionPendiente.index, 1);
+                    guardarDatosEnServidor();
+                    actualizarUI();
+                    mostrarNotificacion('success', 'Registro Eliminado', '');
+                } else if (accionPendiente.tipo === 'eliminarOperario') {
+                    eliminarOperario(accionPendiente.id);
+                }
+            }
+            cerrarConfirmacion();
+        }
+
+        function cerrarConfirmacion() {
+            document.getElementById('modalConfirmacion').classList.add('hidden');
+            document.getElementById('modalConfirmacion').classList.remove('flex');
+            accionPendiente = null;
+        }
+
+        // ============ TECLAS RÁPIDAS ============
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); registrarLiberacion(); }
+            if (e.key === 'F1') { e.preventDefault(); selectCondicion('verde'); }
+            if (e.key === 'F2') { e.preventDefault(); selectCondicion('amarillo'); }
+            if (e.key === 'F3') { e.preventDefault(); document.getElementById('chasisInput').focus(); }
+            if (e.key === 'Escape') { cerrarNotificacion(); cerrarConfirmacion(); }
+        });
+
+        // ============ CIERRE DE MODALES ============
+        document.querySelectorAll('.modal-backdrop, .identidad-modal').forEach(el => {
+            el.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    if (this.id === 'modalNotificacion') cerrarNotificacion();
+                    else if (this.id === 'modalConfirmacion') cerrarConfirmacion();
+                }
+            });
+        });
+
+        // ============ INICIALIZAR PESTAÑA ============
+        switchTab('registro');
+    </script>
+</body>
+</html>
